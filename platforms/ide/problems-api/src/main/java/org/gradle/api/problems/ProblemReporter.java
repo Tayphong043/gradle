@@ -37,7 +37,7 @@ public interface ProblemReporter {
      * @return The new problem.
      * @since 8.13
      */
-    Problem create(Action<? super ProblemSpec> action);
+    Problem create(ProblemId problemId, Action<? super ProblemSpec> action);
 
     /**
      * Configures and reports a new problem.
@@ -47,7 +47,7 @@ public interface ProblemReporter {
      * @param spec the problem configuration
      * @since 8.13
      */
-    void report(Action<? super ProblemSpec> spec);
+    void report(ProblemId problemId, Action<? super ProblemSpec> spec);
 
     /**
      * Reports the target problem.

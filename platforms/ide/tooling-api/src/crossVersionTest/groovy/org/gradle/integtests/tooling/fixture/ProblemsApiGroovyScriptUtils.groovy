@@ -20,7 +20,7 @@ import org.gradle.util.GradleVersion
 
 class ProblemsApiGroovyScriptUtils {
 
-    static String report(GradleVersion targetVersion) {
+    static String report(GradleVersion targetVersion, String idName = 'id', String idDisplayName = 'shortProblemMessage') {
         if (targetVersion < GradleVersion.version("8.6")) {
             'create'
         } else if (targetVersion < GradleVersion.version("8.12")) {
@@ -28,7 +28,7 @@ class ProblemsApiGroovyScriptUtils {
         } else if (targetVersion < GradleVersion.version("8.13")) {
             'getReporter().reporting '
         } else {
-            'getReporter().report '
+            "getReporter().report(org.gradle.api.problems.ProblemId.create(\"$idName\", \"$idDisplayName\", org.gradle.api.problems.ProblemGroup.create(\"generic\", \"Generic\"))) "
         }
     }
 
