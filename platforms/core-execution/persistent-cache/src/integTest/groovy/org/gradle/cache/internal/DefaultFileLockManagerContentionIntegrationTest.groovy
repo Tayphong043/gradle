@@ -368,7 +368,7 @@ class DefaultFileLockManagerContentionIntegrationTest extends AbstractIntegratio
     }
 
     def setupLockOwner(Consumer<FileLockReleasedSignal> whenContended = null) {
-        receivingFileLockContentionHandler = new DefaultFileLockContentionHandler(new DefaultExecutorFactory(), new InetAddressProvider() {
+        receivingFileLockContentionHandler = new DefaultFileLockContentionHandler(new DefaultExecutorFactory(), gradleUserHomeDirProvider, new InetAddressProvider() {
             @Override
             InetAddress getWildcardBindingAddress() {
                 return addressFactory.wildcardBindingAddress

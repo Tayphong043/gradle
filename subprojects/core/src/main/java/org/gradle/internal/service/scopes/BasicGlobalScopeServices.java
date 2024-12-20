@@ -37,6 +37,7 @@ import org.gradle.cache.internal.locklistener.FileLockContentionHandler;
 import org.gradle.cache.internal.locklistener.InetAddressProvider;
 import org.gradle.initialization.BuildCancellationToken;
 import org.gradle.initialization.DefaultBuildCancellationToken;
+import org.gradle.initialization.GradleUserHomeDirProvider;
 import org.gradle.internal.Factory;
 import org.gradle.internal.concurrent.DefaultExecutorFactory;
 import org.gradle.internal.concurrent.ExecutorFactory;
@@ -77,9 +78,10 @@ public class BasicGlobalScopeServices implements ServiceRegistrationProvider {
     }
 
     @Provides
-    FileLockContentionHandler createFileLockContentionHandler(ExecutorFactory executorFactory, InetAddressFactory inetAddressFactory) {
+    FileLockContentionHandler createFileLockContentionHandler(GradleUserHomeDirProvider gradleUserHomeDirProvider, ExecutorFactory executorFactory, InetAddressFactory inetAddressFactory) {
         return new DefaultFileLockContentionHandler(
             executorFactory,
+            gradleUserHomeDirProvider::getGradleUserHomeDirectory,
             new InetAddressProvider() {
                 @Override
                 public InetAddress getWildcardBindingAddress() {

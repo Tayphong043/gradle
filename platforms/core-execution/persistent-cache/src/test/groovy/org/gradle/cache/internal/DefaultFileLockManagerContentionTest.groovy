@@ -50,8 +50,8 @@ class DefaultFileLockManagerContentionTest extends ConcurrentSpec {
             return addressFactory.communicationAddresses
         }
     }
-    FileLockContentionHandler contentionHandler = new DefaultFileLockContentionHandler(executorFactory, addressProvider)
-    FileLockContentionHandler contentionHandler2 = new DefaultFileLockContentionHandler(executorFactory, addressProvider)
+    FileLockContentionHandler contentionHandler = new DefaultFileLockContentionHandler(executorFactory, gradleUserHomeDirProvider, addressProvider)
+    FileLockContentionHandler contentionHandler2 = new DefaultFileLockContentionHandler(executorFactory, gradleUserHomeDirProvider, addressProvider)
     FileLockManager manager = new DefaultFileLockManager(Stub(ProcessMetaDataProvider), 2000, contentionHandler)
     FileLockManager manager2 = new DefaultFileLockManager(Stub(ProcessMetaDataProvider), 2000, contentionHandler2)
 

@@ -38,8 +38,8 @@ class DefaultFileLockContentionHandlerTest extends ConcurrentSpecification {
             return addressFactory.communicationAddresses
         }
     }
-    def handler = new DefaultFileLockContentionHandler(executorFactory, addressProvider)
-    def client = new DefaultFileLockContentionHandler(executorFactory, addressProvider)
+    def handler = new DefaultFileLockContentionHandler(executorFactory, gradleUserHomeDirProvider, addressProvider)
+    def client = new DefaultFileLockContentionHandler(executorFactory, gradleUserHomeDirProvider, addressProvider)
 
     def cleanup() {
         handler?.stop()
@@ -87,7 +87,7 @@ class DefaultFileLockContentionHandlerTest extends ConcurrentSpecification {
 
     def "there are only two executors: one lock request listener and one release lock action executor"() {
         def factory = Mock(ExecutorFactory)
-        handler = new DefaultFileLockContentionHandler(factory, addressProvider)
+        handler = new DefaultFileLockContentionHandler(factory, gradleUserHomeDirProvider, addressProvider)
 
         when:
         handler.reservePort()
@@ -173,7 +173,7 @@ class DefaultFileLockContentionHandlerTest extends ConcurrentSpecification {
 
     def "reserving port does not start the thread"() {
         def factory = Mock(ExecutorFactory)
-        handler = new DefaultFileLockContentionHandler(factory, addressProvider)
+        handler = new DefaultFileLockContentionHandler(factory, gradleUserHomeDirProvider, addressProvider)
 
         when:
         handler.reservePort()
@@ -186,7 +186,7 @@ class DefaultFileLockContentionHandlerTest extends ConcurrentSpecification {
         def factory = Mock(ExecutorFactory)
         def lockRequestListener = Mock(ManagedExecutor)
         def releaseLockActionExecutor = Mock(ManagedExecutor)
-        handler = new DefaultFileLockContentionHandler(factory, addressProvider)
+        handler = new DefaultFileLockContentionHandler(factory, gradleUserHomeDirProvider, addressProvider)
 
         when:
         handler.reservePort()

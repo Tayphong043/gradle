@@ -164,7 +164,7 @@ class BuildCacheClientModule extends AbstractModule {
 
     @Provides
     FileLockContentionHandler createFileLockContentionHandler(ExecutorFactory executorFactory) {
-        return new DefaultFileLockContentionHandler(executorFactory, new InetAddressProvider() {
+        return new DefaultFileLockContentionHandler(executorFactory, () -> new File("."), new InetAddressProvider() {
             @Override
             public InetAddress getWildcardBindingAddress() {
                 return new InetSocketAddress(0).getAddress();

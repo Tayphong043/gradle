@@ -16,6 +16,7 @@
 
 package org.gradle.cache.internal.locklistener;
 
+import org.gradle.api.JavaVersion;
 import org.gradle.cache.FileLockReleasedSignal;
 import org.gradle.internal.concurrent.ExecutorFactory;
 import org.gradle.internal.concurrent.ManagedExecutor;
@@ -23,7 +24,7 @@ import org.gradle.internal.concurrent.Stoppable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.DatagramPacket;
+import java.io.File;
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -32,6 +33,7 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static org.gradle.cache.internal.locklistener.FileLockPacketType.LOCK_RELEASE_CONFIRMATION;
 
@@ -51,7 +53,7 @@ import static org.gradle.cache.internal.locklistener.FileLockPacketType.LOCK_REL
  * A Lock Requester will notice that a lock is held by a Lock Holder by failing to lock the lock file.
  * It then turns to this contention via {@link #maybePingOwner(int, long, String, long, FileLockReleasedSignal)}.
  * <p>
- * Both Lock Holder and Lock Requester listen on a socket using {@link FileLockCommunicator}. The messages they
+ * Both Lock Holder and Lock Requester listen on a socket using {@link InetSocketFileLockCommunicator}. The messages they
  * exchange contain only the lock id. If this contention handler receives such a message it determines if it
  * is a Lock Holder or a Lock Requester by checking if it knows an action to release the lock (i.e. if start() was
  * called for the lock in question).
@@ -84,15 +86,17 @@ public class DefaultFileLockContentionHandler implements FileLockContentionHandl
 
     private final ExecutorFactory executorFactory;
     private final InetAddressProvider inetAddressProvider;
+    private final Supplier<File> gradleUserHomeDirProvider;
 
     private FileLockCommunicator communicator;
     private ManagedExecutor fileLockRequestListener;
     private ManagedExecutor unlockActionExecutor;
     private boolean stopped;
 
-    public DefaultFileLockContentionHandler(ExecutorFactory executorFactory, InetAddressProvider inetAddressProvider) {
+    public DefaultFileLockContentionHandler(ExecutorFactory executorFactory, Supplier<File> gradleUserHomeDirProvider, InetAddressProvider inetAddressProvider) {
         this.executorFactory = executorFactory;
         this.inetAddressProvider = inetAddressProvider;
+        this.gradleUserHomeDirProvider = gradleUserHomeDirProvider;
     }
 
     private Runnable listener() {
@@ -112,7 +116,7 @@ public class DefaultFileLockContentionHandler implements FileLockContentionHandl
 
             private void doRun() {
                 while (true) {
-                    DatagramPacket packet;
+                    FileLockPacket packet;
                     FileLockPacketPayload payload;
                     try {
                         packet = communicator.receive();
@@ -259,7 +263,10 @@ public class DefaultFileLockContentionHandler implements FileLockContentionHandl
         try {
             assertNotStopped();
             if (communicator == null) {
-                communicator = new FileLockCommunicator(inetAddressProvider);
+                // TODO: Do we need some better logic here to determine which communicator to use?
+                communicator = JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)
+                    ? new UnixDomainSocketFileLockCommunicator(gradleUserHomeDirProvider.get())
+                    : new InetSocketFileLockCommunicator(inetAddressProvider);
             }
             return communicator;
         } finally {

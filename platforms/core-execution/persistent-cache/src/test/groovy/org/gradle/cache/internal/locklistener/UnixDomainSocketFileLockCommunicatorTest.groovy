@@ -17,25 +17,17 @@
 
 package org.gradle.cache.internal.locklistener
 
-import org.gradle.internal.remote.internal.inet.InetAddressFactory
+
 import org.gradle.util.ConcurrentSpecification
+
+import java.nio.ByteBuffer
+import java.nio.channels.SocketChannel
 
 import static org.gradle.test.fixtures.ConcurrentTestUtil.poll
 
-class FileLockCommunicatorTest extends ConcurrentSpecification {
+class UnixDomainSocketFileLockCommunicatorTest extends ConcurrentSpecification {
 
-    def addressFactory = new InetAddressFactory()
-    def communicator = new FileLockCommunicator(new InetAddressProvider() {
-        @Override
-        InetAddress getWildcardBindingAddress() {
-            return addressFactory.wildcardBindingAddress
-        }
-
-        @Override
-        Iterable<InetAddress> getCommunicationAddresses() {
-            return addressFactory.communicationAddresses
-        }
-    })
+    def communicator = new UnixDomainSocketFileLockCommunicator(new File("."))
 
     def cleanup() {
         communicator.stop()
@@ -67,6 +59,7 @@ class FileLockCommunicatorTest extends ConcurrentSpecification {
         }
 
         when:
+        Thread.sleep(1000)
         communicator.pingOwner(communicator.getPort(), 155, "lock")
 
         then:
@@ -89,10 +82,10 @@ class FileLockCommunicatorTest extends ConcurrentSpecification {
         }
 
         when:
-        def socket = new DatagramSocket(0, addressFactory.getWildcardBindingAddress())
-        def bytes = [1, 0, 0, 0, 0, 0, 0, 0, 155] as byte[]
-        addressFactory.getCommunicationAddresses().each { address ->
-            socket.send(new DatagramPacket(bytes, bytes.length, new InetSocketAddress(address, communicator.port)))
+        def socket = UnixDomainSocketFileLockCommunicator.unixDomainSocketAddressOf(communicator.getPort())
+        def bytes = [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 155] as byte[]
+        try (SocketChannel clientChannel = SocketChannel.open(socket)) {
+            clientChannel.write(ByteBuffer.wrap(bytes));
         }
 
         then:
