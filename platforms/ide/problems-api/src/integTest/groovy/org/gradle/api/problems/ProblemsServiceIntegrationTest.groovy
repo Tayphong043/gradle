@@ -283,9 +283,7 @@ class ProblemsServiceIntegrationTest extends AbstractIntegrationSpec {
         given:
         withReportProblemTask """
             ${problemIdScript()}
-            problems.getReporter().throwing(new RuntimeException('test')) {
-                it.id(problemId)
-            }
+            problems.getReporter().throwing(new RuntimeException('test'), problemId) { }
         """
 
         when:
@@ -300,13 +298,9 @@ class ProblemsServiceIntegrationTest extends AbstractIntegrationSpec {
         withReportProblemTask """
             ${problemIdScript()}
             try {
-                problems.getReporter().throwing(new RuntimeException("test")) {
-                    it.id(${ProblemId.name}.create("type11", "inner", problemGroup))
-                }
+                problems.getReporter().throwing(new RuntimeException("test"), ${ProblemId.name}.create("type11", "inner", problemGroup)) { }
             } catch (RuntimeException ex) {
-                problems.getReporter().throwing(ex) {
-                    it.id(${ProblemId.name}.create("type12", "outer", problemGroup))
-                }
+                problems.getReporter().throwing(ex, ${ProblemId.name}.create("type12", "outer", problemGroup)) { }
             }
         """
 

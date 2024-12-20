@@ -38,7 +38,11 @@ class ProblemsApiGroovyScriptUtils {
         } else if (targetVersion < GradleVersion.version("8.13")) {
             "id(\"$name\", \"$displayName\")"
         } else {
-            "id(org.gradle.api.problems.ProblemId.create(\"$name\", \"$displayName\", org.gradle.api.problems.ProblemGroup.create(\"generic\", \"Generic\")))"
+            "id(${createIdExpression(name, displayName)})"
         }
+    }
+
+    static String createIdExpression(String name = 'type', String displayName = 'label') {
+        "org.gradle.api.problems.ProblemId.create(\"$name\", \"$displayName\", org.gradle.api.problems.ProblemGroup.create(\"generic\", \"Generic\"))"
     }
 }

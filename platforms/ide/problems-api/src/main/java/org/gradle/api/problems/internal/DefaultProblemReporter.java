@@ -67,8 +67,9 @@ public class DefaultProblemReporter implements InternalProblemReporter {
     }
 
     @Override
-    public RuntimeException throwing(Throwable exception, Action<? super ProblemSpec> spec) {
+    public RuntimeException throwing(Throwable exception, ProblemId problemId, Action<? super ProblemSpec> spec) {
         DefaultProblemBuilder problemBuilder = createProblemBuilder();
+        problemBuilder.id(problemId);
         spec.execute(problemBuilder);
         problemBuilder.withException(exception);
         report(problemBuilder.build());

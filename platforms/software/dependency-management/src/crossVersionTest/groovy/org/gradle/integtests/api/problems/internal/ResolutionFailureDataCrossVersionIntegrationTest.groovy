@@ -112,7 +112,7 @@ class ResolutionFailureDataCrossVersionIntegrationTest extends ToolingApiSpecifi
         } else if (targetVersion < GradleVersion.version("8.13")) {
             'getReporter().reporting '
         } else {
-            'getReporter().report(org.gradle.api.problems.ProblemId.create("type", "label", org.gradle.api.problems.ProblemGroup.create("generic", "Generic")))) '
+            'getReporter().report(org.gradle.api.problems.ProblemId.create("type", "label", org.gradle.api.problems.ProblemGroup.create("generic", "Generic"))) '
         }
     }
 
